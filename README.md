@@ -3,6 +3,9 @@
 It allows you to choose which version of Python you will use for a given program name, 
 if there are multiple versions of this program.
 
+By default, if the python version is not selected for the command, then an attempt is made to find the command 
+in the last python version installed.
+
 ## Install
 
 Installing **pyenv-choice** as a pyenv plugin will give you access to the provided behavior.
