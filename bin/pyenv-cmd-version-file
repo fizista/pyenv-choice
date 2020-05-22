@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+# Usage: pyenv cmd-version-file <command> [<dir>]
+set -e
+[ -n "$PYENV_DEBUG" ] && set -x
+
+cmd_name=$1
+target_dir="$2"
+
+find_local_version_file() {
+  local root="$1"
+  while ! [[ "$root" =~ ^//[^/]*$ ]]; do
+    if [ -f "${root}/.cmd-version__${cmd_name}" ]; then
+      echo "${root}/.cmd-version__${cmd_name}"
+      return 0
+    fi
+    [ -n "$root" ] || break
+    root="${root%/*}"
+  done
+  return 1
+}
+
+if [ -n "$target_dir" ]; then
+  find_local_version_file "$target_dir"
+else
+  find_local_version_file "$PYENV_DIR" || {
+    [ "$PYENV_DIR" != "$PWD" ] && find_local_version_file "$PWD"
+  } || echo "${PYENV_ROOT}/versions/.cmd-version__${cmd_name}"
+fi

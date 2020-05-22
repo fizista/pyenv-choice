@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+#
+# Summary: Set or show the local command from the specified python version.
+#
+# Usage: pyenv cmd-local <command> <version>
+#        pyenv cmd-local <command> --unset
+#
+# Sets the local command version by writing the
+# version name to a file named `.cmd-version__<command>'.
+#
+# When you run a "command", pyenv will look for a `.cmd-version__<command>'
+# file in the current directory and each parent directory. If no such
+# file is found in the tree, pyenv will use the global "command" version
+# specified with `pyenv cmd-global'. If the global configuration is not set,
+# then the last python environment containing this command is used.
+#
+# A version specified with the `PYENV_VERSION' environment variable takes
+# precedence over cmd-local and cmd-global versions.
+#
+# <version> should be a version tag known to pyenv.
+# The special version string `system' will use your default system Python.
+# Run `pyenv versions' for a list of available Python versions.
+#
+# Example: To enable the pipenv from python 3.8.1:
+#
+# 'pyenv cmd-local pipenv 3.8.1'
+#
+
+set -e
+[ -n "$PYENV_DEBUG" ] && set -x
+
+cmd_name=$1
+
+# Provide pyenv completions
+if [ "$1" = "--complete" ]; then
+  echo --unset
+  versions=($(pyenv-whence "${2}" 2>/dev/null || true))
+  for cmd_version in "${versions[@]}"; do
+    echo $cmd_version
+  done
+  exit
+fi
+
+if [ -z "$cmd_name" ]; then
+  echo "pyenv: You must give the name of the command." 1>&2
+  exit 1
+fi
+
+version=$2
+
+if [ "$version" = "--unset" ]; then
+  rm -f .cmd-version__${cmd_name}
+elif [ -n "$version" ]; then
+  pyenv-version-file-write .cmd-version__${cmd_name} "${version}"
+else
+  if version_file="$(pyenv-cmd-version-file "$cmd_name")" && [ -f "$version_file" ] && IFS=: versions=($(pyenv-version-file-read "$version_file"))
+  then
+    for version in "${versions[@]}"; do
+      echo "$version"
+    done
+  else
+    echo "pyenv: no local command version configured for this directory" 1>&2
+    exit 1
+  fi
+fi
