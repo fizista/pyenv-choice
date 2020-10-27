@@ -1,7 +1,7 @@
 if [ -n "$PYENV_COMMAND" ] && [ ! -x "$PYENV_COMMAND_PATH" ]; then
   versions=($(pyenv-whence "${PYENV_COMMAND}" 2>/dev/null || true))
   if [ -n "${versions}" ]; then
-    if [ "${#versions[@]}" -gt 1 ]; then
+    if [ "${#versions[@]}" -ge 1 ]; then
       main_version=$(pyenv-cmd-local "${PYENV_COMMAND}" 2>/dev/null || true)
       if [ -n "$main_version" ]; then
         echo -e "############################### \e[1mpyenv-choice\e[0m #################################" 1>&2
